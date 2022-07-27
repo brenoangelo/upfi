@@ -18,18 +18,17 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
 
   const formValidations = {
     image: {
-      // TODO REQUIRED, LESS THAN 10 MB AND ACCEPTED FORMATS VALIDATIONS
-      required: "A imagem é obrigatória",
+      required: 'A imagem é obrigatória',
       validate: {
-        lessThan10MB: files => files[0]?.size < 10000000 || 'Max 10MB',
-        acceptedFormats: files =>
+        lessThan10MB: (files: HTMLInputElement) =>
+          files[0]?.size < 10000000 || 'Max 10MB',
+        acceptedFormats: (files: HTMLInputElement) =>
           ['image/jpeg', 'image/png', 'image/gif'].includes(files[0]?.type) ||
           'Somente PNG, JPEG e GIF',
       },
     },
     title: {
-      // TODO REQUIRED, MIN AND MAX LENGTH VALIDATIONS
-      required: "O campo título é obrigatório",
+      required: 'O campo título é obrigatório',
       minLength: {
         value: 2,
         message: 'Mínimo 2 caracteres',
@@ -40,8 +39,7 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
       },
     },
     description: {
-      // TODO REQUIRED, MAX LENGTH VALIDATIONS
-      required: "A descrição é obrigatória",
+      required: 'A descrição é obrigatória',
       maxLength: {
         value: 20,
         message: 'Máximo 20 caracteres',
@@ -51,23 +49,21 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
 
   const queryClient = useQueryClient();
   const mutation = useMutation(
-    // TODO MUTATION API POST REQUEST,
-    async (image) => {
-      const { title, description, url } = image
+    async (image: Record<string, unknown>) => {
+      const { title, description, url } = image;
 
       const response = await api.post('/api/images', {
         title,
         description,
-        url
-      })
+        url,
+      });
 
-      return response.data.image
+      return response.data.image;
     },
     {
-      // TODO ONSUCCESS MUTATION
       onSuccess: () => {
-        queryClient.invalidateQueries('images')
-      }
+        queryClient.invalidateQueries('images');
+      },
     }
   );
 
@@ -77,10 +73,7 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
 
   const onSubmit = async (data: Record<string, unknown>): Promise<void> => {
     try {
-      // TODO SHOW ERROR TOAST IF IMAGE URL DOES NOT EXISTS
-      // TODO EXECUTE ASYNC MUTATION
-      // TODO SHOW SUCCESS TOAST
-      if(!setImageUrl) {
+      if (!setImageUrl) {
         toast({
           title: 'Erro',
           description: 'A url da imagem não existe',
@@ -91,12 +84,8 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
 
         return;
       }
-      const {title, description} = data
-      await mutation.mutateAsync({
-        title,
-        description,
-        url: imageUrl
-      })
+
+      await mutation.mutateAsync({ ...data, url: imageUrl });
 
       toast({
         title: 'Sucesso!',
@@ -106,7 +95,6 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
         isClosable: true,
       });
     } catch {
-      // TODO SHOW ERROR TOAST IF SUBMIT FAILED
       toast({
         title: 'Falha no envio',
         description: 'Ocorreu um erro ao enviar',
@@ -115,10 +103,8 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
         isClosable: true,
       });
     } finally {
-      // TODO CLEAN FORM, STATES AND CLOSE MODAL
-      setImageUrl('');
-      setLocalImageUrl('');
-      closeModal()
+      reset();
+      closeModal();
     }
   };
 
@@ -131,24 +117,18 @@ export function FormAddImage({ closeModal }: FormAddImageProps): JSX.Element {
           setLocalImageUrl={setLocalImageUrl}
           setError={setError}
           trigger={trigger}
-          // TODO SEND IMAGE ERRORS
-          // TODO REGISTER IMAGE INPUT WITH VALIDATIONS
           error={errors.image}
           {...register('image', formValidations.image)}
         />
 
         <TextInput
           placeholder="Título da imagem..."
-          // TODO SEND TITLE ERRORS
-          // TODO REGISTER TITLE INPUT WITH VALIDATIONS
           {...register('title', formValidations.title)}
           error={errors.title}
         />
 
         <TextInput
           placeholder="Descrição da imagem..."
-          // TODO SEND DESCRIPTION ERRORS
-          // TODO REGISTER DESCRIPTION INPUT WITH VALIDATIONS
           {...register('description', formValidations.description)}
           error={!!errors.description}
         />

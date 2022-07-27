@@ -1,5 +1,5 @@
-import { Button, Box } from '@chakra-ui/react';
 import { useMemo } from 'react';
+import { Button, Box } from '@chakra-ui/react';
 import { useInfiniteQuery } from 'react-query';
 
 import { Header } from '../components/Header';
@@ -18,37 +18,28 @@ export default function Home(): JSX.Element {
     hasNextPage,
   } = useInfiniteQuery(
     'images',
-    // TODO AXIOS REQUEST WITH PARAM
-    ({ pageParam = 0 }) => api.get('/api/images', { params: pageParam }),
-    // TODO GET AND RETURN NEXT PAGE PARAM
+    ({ pageParam }) => api.get('/api/images', { params: pageParam }),
     {
-      getNextPageParam: (lastPage, pages) => lastPage.data,
+      getNextPageParam: lastPage => {
+        if (lastPage.data.after) {
+          return lastPage.data;
+        }
+
+        return undefined;
+      },
     }
   );
 
-  console.log(hasNextPage);
-
   const formattedData = useMemo(() => {
-    // TODO FORMAT AND FLAT DATA ARRAY
-    if (!data) {
-      return;
-    }
+    if (!data) return;
 
-    const formated = data.pages.flatMap(item => {
-      return item.data.data
-    })
-
-    console.log(data)
-
-    return formated
+    return data.pages.flatMap(item => item.data.data);
   }, [data]);
 
-  // TODO RENDER LOADING SCREEN
   if (isLoading) {
     return <Loading />;
   }
 
-  // TODO RENDER ERROR SCREEN
   if (isError) {
     return <Error />;
   }
@@ -60,7 +51,11 @@ export default function Home(): JSX.Element {
       <Box maxW={1120} px={20} mx="auto" my={20}>
         <CardList cards={formattedData} />
         {hasNextPage && (
-          <Button mt={10} onClick={() => fetchNextPage()}>
+          <Button
+            mt={10}
+            onClick={() => fetchNextPage()}
+            isLoading={isFetchingNextPage}
+          >
             Carregar mais
           </Button>
         )}
