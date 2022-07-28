@@ -23,7 +23,9 @@ import {
   useEffect,
 } from 'react';
 import {
+  DeepRequired,
   FieldError,
+  FieldErrorsImpl,
   FieldValues,
   UseFormSetError,
   UseFormTrigger,
@@ -33,7 +35,7 @@ import { api } from '../../services/api';
 
 export interface FileInputProps {
   name: string;
-  error?: FieldError;
+  error?: FieldErrorsImpl<DeepRequired<FieldValues>>;
   setImageUrl: Dispatch<SetStateAction<string>>;
   localImageUrl: string;
   setLocalImageUrl: Dispatch<SetStateAction<string>>;
